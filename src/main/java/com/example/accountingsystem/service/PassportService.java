@@ -2,6 +2,7 @@ package com.example.accountingsystem.service;
 
 import com.example.accountingsystem.dto.PassportDto;
 import com.example.accountingsystem.entity.Passport;
+import com.example.accountingsystem.entity.Employee;
 import com.example.accountingsystem.entity.Person;
 import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
@@ -23,18 +24,29 @@ public class PassportService {
         this.passportRepository = passportRepository;
     }
 
-    private boolean findByNumberAndSeries(String series, int number) {
-        Optional<Passport> optional = passportRepository.findBySeriesAndNumber(series, number);
-        if (optional.isPresent()) {
+    private boolean findByNumberAndSeries(String series, String number) {
+        if (passportRepository.existsBySeriesAndNumber(series, number)) {
             throw new ObjectExistsException("Passport already exists");
         }
         return true;
     }
 
-    private boolean findByIdAndSeriesAndNumber(String series, int number, int id) {
-        Optional<Passport> optional =
-                passportRepository.findByIdAndSeriesAndNumber(id, series, number);
-        if (optional.isEmpty()) {
+    private boolean findByIdentityNumber(String identityNumber) {
+        if (passportRepository.existsByIdentityNumber(identityNumber)) {
+            throw new ObjectExistsException("Identity number already taken");
+        }
+        return true;
+    }
+
+    private boolean findByIdNotAndIdentityNumber(String identityNumber, int id) {
+        if (passportRepository.existsByIdNotAndIdentityNumber(id, identityNumber)) {
+            throw new ObjectExistsException("This identity number already taken");
+        }
+        return true;
+    }
+
+    private boolean findByIdNotAndSeriesAndNumber(String series, String number, int id) {
+        if (passportRepository.existsByIdNotAndSeriesAndNumber(id, series, number)) {
             throw new ObjectExistsException("Passport already exists");
         }
         return true;
@@ -48,7 +60,7 @@ public class PassportService {
         throw new ObjectNotFoundException("Passport not found");
     }
 
-    public Passport findById(int id) {
+    private Passport findById(int id) {
         Optional<Passport> optionalPassport = passportRepository.findById(id);
         if (optionalPassport.isPresent()) {
             return optionalPassport.get();
@@ -59,7 +71,9 @@ public class PassportService {
 
     @Transactional
     public void save(PassportDto passportDto, Person person) {
-        if (findByNumberAndSeries(passportDto.getSeries(), passportDto.getNumber())) {
+        if (findByNumberAndSeries(passportDto.getSeries(), passportDto.getNumber()) &&
+                findByIdentityNumber(passportDto.getIdentityNumber())
+        ) {
             Passport passport = new Passport(
                     passportDto.getNumber(),
                     passportDto.getSeries(),
@@ -74,11 +88,15 @@ public class PassportService {
     @Transactional
     public void edit(PassportDto passportDto, Person person) {
         Passport passport = findByPerson(person);
-        passport.setSeries(passportDto.getSeries());
-        passport.setNumber(passportDto.getNumber());
-        passport.setNationality(passportDto.getNationality());
-        passport.setJShShIR(passportDto.getIdentityNumber());
-        passportRepository.save(passport);
+        if (findByIdNotAndSeriesAndNumber(passportDto.getSeries(), passportDto.getNumber(), passport.getId())
+                && findByIdNotAndIdentityNumber(passportDto.getIdentityNumber(), passport.getId())
+        ) {
+            passport.setSeries(passportDto.getSeries());
+            passport.setNumber(passportDto.getNumber());
+            passport.setNationality(passportDto.getNationality());
+            passport.setIdentityNumber(passportDto.getIdentityNumber());
+            passportRepository.save(passport);
+        }
     }
 
     @Transactional

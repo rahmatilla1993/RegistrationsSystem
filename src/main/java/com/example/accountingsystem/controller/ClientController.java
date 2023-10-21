@@ -1,93 +1,74 @@
 package com.example.accountingsystem.controller;
 
-import com.example.accountingsystem.dto.PersonDto;
+import com.example.accountingsystem.dto.ClientDto;
 import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
 import com.example.accountingsystem.payload.ApiResponse;
-import com.example.accountingsystem.service.PeopleService;
+import com.example.accountingsystem.service.ClientService;
 import com.example.accountingsystem.validations.ResponseErrorValidation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/employee")
-public class PeopleController {
+@RequestMapping("/api/client")
+public class ClientController {
 
-    private final PeopleService peopleService;
+    private final ClientService clientService;
     private final ResponseErrorValidation errorValidation;
 
     @Autowired
-    public PeopleController(PeopleService peopleService,
+    public ClientController(ClientService clientService,
                             ResponseErrorValidation errorValidation) {
-        this.peopleService = peopleService;
+        this.clientService = clientService;
         this.errorValidation = errorValidation;
     }
 
-    @GetMapping
-    public HttpEntity<?> getAll(Pageable pageable) {
-        return ResponseEntity.ok(
-                peopleService.getAll(pageable)
-        );
-    }
-
-    @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable int id) {
-        return ResponseEntity.ok(
-                peopleService.findById(id)
-        );
-    }
-
     @PostMapping
-    public HttpEntity<?> save(@RequestBody @Valid PersonDto personDto,
-                              BindingResult bindingResult) {
+    public HttpEntity<?> save(@RequestBody @Valid ClientDto clientDto,
+                              BindingResult bindingResult
+    ) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                peopleService.save(personDto)
+                clientService.save(clientDto)
         );
     }
 
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable int id,
-                              @RequestBody @Valid PersonDto personDto,
-                              BindingResult bindingResult) {
+                              @RequestBody @Valid ClientDto clientDto,
+                              BindingResult bindingResult
+    ) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                peopleService.edit(personDto, id)
-        );
-    }
-
-    @DeleteMapping("/{id}")
-    public HttpEntity<?> delete(@PathVariable int id) {
-        return ResponseEntity.ok(
-                peopleService.delete(id)
+                clientService.edit(clientDto, id)
         );
     }
 
     @ExceptionHandler
     public HttpEntity<?> exceptionHandler(ObjectExistsException ex) {
-        return getApiResponse(ex.getMessage());
+        var apiResponse = new ApiResponse(ex.getMessage(), false);
+        return ResponseEntity
+                .badRequest()
+                .body(apiResponse);
     }
 
     @ExceptionHandler
     public HttpEntity<?> exceptionHandler(ObjectNotFoundException ex) {
-        return getApiResponse(ex.getMessage());
-    }
-
-    public HttpEntity<?> getApiResponse(String exceptionMessage) {
+        var apiResponse = new ApiResponse(ex.getMessage(), false);
         return ResponseEntity
-                .badRequest()
-                .body(new ApiResponse(exceptionMessage, false));
+                .status(HttpStatus.NOT_FOUND)
+                .body(apiResponse);
     }
 }

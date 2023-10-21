@@ -10,9 +10,13 @@ import java.util.Optional;
 @Repository
 public interface PassportRepository extends JpaRepository<Passport, Integer> {
 
-    Optional<Passport> findBySeriesAndNumber(String series, int number);
+    boolean existsBySeriesAndNumber(String series, String number);
 
     Optional<Passport> findByPerson(Person person);
 
-    Optional<Passport> findByIdAndSeriesAndNumber(int id, String series, int number);
+    boolean existsByIdNotAndSeriesAndNumber(int id, String series, String number);
+
+    boolean existsByIdentityNumber(String identityNumber);
+
+    boolean existsByIdNotAndIdentityNumber(int id, String identityNumber);
 }

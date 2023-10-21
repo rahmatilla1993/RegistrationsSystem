@@ -1,14 +1,11 @@
 package com.example.accountingsystem.dto;
 
 import jakarta.validation.Valid;
-import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
-import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 import lombok.Data;
 
 @Data
-public class PersonDto {
+public class EmployeeDto {
 
     @NotEmpty(message = "Firstname should not be empty")
     @Size(min = 3, message = "Name must not be less than 5 characters long")
@@ -17,6 +14,17 @@ public class PersonDto {
     @NotEmpty(message = "Lastname should not be empty")
     @Size(min = 4, message = "Lastname must not be less than 5 characters long")
     private String lastName;
+
+    @NotEmpty(message = "Email should not be empty")
+    @Email(message = "The email did not match")
+    private String email;
+
+    @NotEmpty(message = "Password should not be empty")
+    @Pattern(
+            regexp = "^(?=.*[A-Za-z])(?=.*\\d).{4,}$",
+            message = "Length is at least 4 characters, consists of letters and numbers"
+    )
+    private String password;
 
     @Min(value = 1, message = "Age will not be less than 1")
     @Max(value = 100, message = "Age will not be more than 100")

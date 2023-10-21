@@ -1,10 +1,10 @@
 package com.example.accountingsystem.controller;
 
-import com.example.accountingsystem.entity.Department;
+import com.example.accountingsystem.dto.EmployeeDto;
 import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
 import com.example.accountingsystem.payload.ApiResponse;
-import com.example.accountingsystem.service.DepartmentService;
+import com.example.accountingsystem.service.EmployeeService;
 import com.example.accountingsystem.validations.ResponseErrorValidation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,65 +17,62 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/department")
-public class DepartmentController {
+@RequestMapping("/api/employee")
+public class EmployeeController {
 
-    private final DepartmentService departmentService;
+    private final EmployeeService employeeService;
     private final ResponseErrorValidation errorValidation;
 
     @Autowired
-    public DepartmentController(DepartmentService departmentService,
-                                ResponseErrorValidation errorValidation
-    ) {
-        this.departmentService = departmentService;
+    public EmployeeController(EmployeeService employeeService,
+                              ResponseErrorValidation errorValidation) {
+        this.employeeService = employeeService;
         this.errorValidation = errorValidation;
     }
 
     @GetMapping
     public HttpEntity<?> getAll(Pageable pageable) {
         return ResponseEntity.ok(
-                departmentService.getAll(pageable)
+                employeeService.getAll(pageable)
         );
     }
 
     @GetMapping("/{id}")
     public HttpEntity<?> findById(@PathVariable int id) {
         return ResponseEntity.ok(
-                departmentService.findById(id)
+                employeeService.findById(id)
         );
     }
 
     @PostMapping
-    public HttpEntity<?> save(@RequestBody @Valid Department department,
-                              BindingResult bindingResult
-    ) {
+    public HttpEntity<?> save(@RequestBody @Valid EmployeeDto employeeDto,
+                              BindingResult bindingResult) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                departmentService.save(department)
+                employeeService.save(employeeDto)
         );
     }
 
     @PutMapping("/{id}")
-    public HttpEntity<?> edit(@RequestBody @Valid Department department,
-                              BindingResult bindingResult,
-                              @PathVariable int id
-    ) {
+    public HttpEntity<?> edit(@PathVariable int id,
+                              @RequestBody @Valid EmployeeDto employeeDto,
+                              BindingResult bindingResult) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                departmentService.edit(department, id)
+                employeeService.edit(employeeDto, id)
         );
     }
 
     @DeleteMapping("/{id}")
     public HttpEntity<?> delete(@PathVariable int id) {
         return ResponseEntity.ok(
-                departmentService.delete(id)
+                employeeService.delete(id)
         );
     }
 
