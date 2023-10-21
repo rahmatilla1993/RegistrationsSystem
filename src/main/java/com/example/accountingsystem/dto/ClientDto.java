@@ -25,9 +25,6 @@ public class ClientDto {
     @Max(value = 100, message = "Age will not be more than 100")
     private int age;
 
-    @NotEmpty(message = "Employee email should not be empty")
-    private String empEmail;
-
     @Valid
     private PassportDto passport;
 }

@@ -12,4 +12,5 @@ public interface ClientRepository extends JpaRepository<Client, Integer> {
     List<Client> findAllByCreatedBy(String employeeUsername);
 
     Optional<Client> findByIdAndCreatedBy(int id, String empUsername);
+    boolean existsById(int id);
 }

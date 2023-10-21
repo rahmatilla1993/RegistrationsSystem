@@ -14,6 +14,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
@@ -39,29 +40,29 @@ public class ClientService {
         return clientRepository.findAll(pageable);
     }
 
-    public Client findById(int id) {
-        Optional<Client> optionalClient = clientRepository.findById(id);
-        if (optionalClient.isPresent()) {
-            return optionalClient.get();
-        }
-        throw new ObjectNotFoundException("Client not found");
+    public boolean findById(int id) {
+        return clientRepository.existsById(id);
     }
 
-    public List<Client> findAllByCreatedBy(String employeeUsername) {
-        return clientRepository.findAllByCreatedBy(employeeUsername);
+    public List<Client> findAllByCreatedBy(Principal principal) {
+        return clientRepository.findAllByCreatedBy(getEmpEmail(principal));
     }
 
     public Client findByIdAndCreatedBy(String empUsername, int id) {
-        Optional<Client> optionalClient = clientRepository.findByIdAndCreatedBy(id, empUsername);
-        if (optionalClient.isPresent()) {
-            return optionalClient.get();
+        if (findById(id)) {
+            Optional<Client> optionalClient = clientRepository.findByIdAndCreatedBy(id, empUsername);
+            if (optionalClient.isPresent()) {
+                return optionalClient.get();
+            }
+            throw new ObjectNotCreateException("This employee has not added this client to the system");
+        } else {
+            throw new ObjectNotFoundException("Client not found");
         }
-        throw new ObjectNotCreateException("This employee has not added this client to the system");
     }
 
     @Transactional
-    public ApiResponse save(ClientDto clientDto) {
-        Employee employee = employeeService.findByEmail(clientDto.getEmpEmail());
+    public ApiResponse save(ClientDto clientDto, Principal principal) {
+        Employee employee = employeeService.findByEmail(getEmpEmail(principal));
         Client client = new Client(
                 clientDto.getFirstName(),
                 clientDto.getLastName(),
@@ -76,8 +77,8 @@ public class ClientService {
     }
 
     @Transactional
-    public ApiResponse edit(ClientDto clientDto, int clientId) {
-        Client client = findByIdAndCreatedBy(clientDto.getEmpEmail(), clientId);
+    public ApiResponse edit(ClientDto clientDto, int clientId, Principal principal) {
+        Client client = findByIdAndCreatedBy(getEmpEmail(principal), clientId);
         passportService.edit(clientDto.getPassport(), client);
         client.setAddress(clientDto.getAddress());
         client.setAge(clientDto.getAge());
@@ -88,9 +89,13 @@ public class ClientService {
     }
 
     @Transactional
-    public ApiResponse delete(int clientId) {
-        Client client = findById(clientId);
+    public ApiResponse delete(int clientId, Principal principal) {
+        Client client = findByIdAndCreatedBy(getEmpEmail(principal), clientId);
         clientRepository.delete(client);
         return new ApiResponse("Client deleted", true);
+    }
+
+    private String getEmpEmail(Principal principal) {
+        return principal.getName();
     }
 }

@@ -11,6 +11,7 @@ import com.example.accountingsystem.repository.EmployeeRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,15 +24,18 @@ public class EmployeeService {
     private final EmployeeRepository employeeRepository;
     private final DepartmentService departmentService;
     private final PassportService passportService;
+    private final PasswordEncoder passwordEncoder;
 
     @Autowired
     public EmployeeService(EmployeeRepository employeeRepository,
                            DepartmentService departmentService,
-                           PassportService passportService
+                           PassportService passportService,
+                           PasswordEncoder passwordEncoder
     ) {
         this.employeeRepository = employeeRepository;
         this.departmentService = departmentService;
         this.passportService = passportService;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public Page<Employee> getAll(Pageable pageable) {
@@ -55,45 +59,54 @@ public class EmployeeService {
         throw new ObjectNotFoundException("Employee not found");
     }
 
-    private boolean findByIdNotAndEmail(String email, int id) {
-        if (employeeRepository.existsByIdNotAndEmail(id, email)) {
-            throw new ObjectExistsException("This email already taken");
-        }
-        return true;
+    private boolean existsByIdNotAndEmail(String email, int id) {
+        return employeeRepository.existsByIdNotAndEmail(id, email);
+    }
+
+    private boolean existsByEmail(String email) {
+        return employeeRepository.existsByEmail(email);
     }
 
     @Transactional
     public ApiResponse save(EmployeeDto employeeDto) {
-        Department department = departmentService.findById(employeeDto.getDepartmentId());
-        Employee employee = new Employee(
-                employeeDto.getFirstName(),
-                employeeDto.getLastName(),
-                employeeDto.getAge(),
-                Role.ROLE_EMPLOYEE,
-                employeeDto.getSalary(),
-                employeeDto.getAddress(),
-                department,
-                employeeDto.getEmail(),
-                employeeDto.getPassword()
-        );
-        Employee savedEmployee = employeeRepository.save(employee);
-        passportService.save(employeeDto.getPassport(), savedEmployee);
-        return new ApiResponse("Employee saved", true);
+        if (!existsByEmail(employeeDto.getEmail())) {
+            Department department = departmentService.findById(employeeDto.getDepartmentId());
+            Employee employee = new Employee(
+                    employeeDto.getFirstName(),
+                    employeeDto.getLastName(),
+                    employeeDto.getAge(),
+                    Role.ROLE_EMPLOYEE,
+                    employeeDto.getSalary(),
+                    employeeDto.getAddress(),
+                    department,
+                    employeeDto.getEmail(),
+                    passwordEncoder.encode(employeeDto.getPassword())
+            );
+            Employee savedEmployee = employeeRepository.save(employee);
+            passportService.save(employeeDto.getPassport(), savedEmployee);
+            return new ApiResponse("Employee saved", true);
+        }
+        throw new ObjectExistsException("This email already taken");
     }
 
     @Transactional
     public ApiResponse edit(EmployeeDto employeeDto, int id) {
-        Employee employee = findById(id);
-        Department department = departmentService.findById(employeeDto.getDepartmentId());
-        employee.setAddress(employeeDto.getAddress());
-        employee.setAge(employeeDto.getAge());
-        employee.setFirstName(employeeDto.getFirstName());
-        employee.setLastName(employeeDto.getLastName());
-        employee.setAddress(employeeDto.getAddress());
-        employee.setSalary(employeeDto.getSalary());
-        employee.setDepartment(department);
-        passportService.edit(employeeDto.getPassport(), employee);
-        return new ApiResponse("Employee edited", true);
+        if (!existsByIdNotAndEmail(employeeDto.getEmail(), id)) {
+            Employee employee = findById(id);
+            Department department = departmentService.findById(employeeDto.getDepartmentId());
+            employee.setAddress(employeeDto.getAddress());
+            employee.setAge(employeeDto.getAge());
+            employee.setFirstName(employeeDto.getFirstName());
+            employee.setLastName(employeeDto.getLastName());
+            employee.setAddress(employeeDto.getAddress());
+            employee.setSalary(employeeDto.getSalary());
+            employee.setDepartment(department);
+            employee.setEmail(employeeDto.getEmail());
+            employee.setPassword(passwordEncoder.encode(employeeDto.getPassword()));
+            passportService.edit(employeeDto.getPassport(), employee);
+            return new ApiResponse("Employee edited", true);
+        }
+        throw new ObjectExistsException("This email already taken");
     }
 
     @Transactional
