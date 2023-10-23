@@ -8,11 +8,11 @@ import lombok.Data;
 public class EmployeeDto {
 
     @NotEmpty(message = "Firstname should not be empty")
-    @Size(min = 3, message = "Name must not be less than 5 characters long")
+    @Size(min = 3, message = "Name must not be less than 3 characters long")
     private String firstName;
 
     @NotEmpty(message = "Lastname should not be empty")
-    @Size(min = 4, message = "Lastname must not be less than 5 characters long")
+    @Size(min = 4, message = "Lastname must not be less than 4 characters long")
     private String lastName;
 
     @NotEmpty(message = "Email should not be empty")
