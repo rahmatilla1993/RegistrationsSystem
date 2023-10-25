@@ -36,16 +36,18 @@ public class ClientService {
         this.employeeService = employeeService;
     }
 
-    public Page<Client> getAll(Pageable pageable) {
-        return clientRepository.findAll(pageable);
+    public ApiResponse getAll(Pageable pageable) {
+        Page<Client> clients = clientRepository.findAll(pageable);
+        return new ApiResponse(clients, true);
     }
 
     public boolean findById(int id) {
         return clientRepository.existsById(id);
     }
 
-    public List<Client> findAllByCreatedBy(Principal principal) {
-        return clientRepository.findAllByCreatedBy(getEmpEmail(principal));
+    public ApiResponse findAllByCreatedBy(Principal principal) {
+        List<Client> clientList = clientRepository.findAllByCreatedBy(getEmpEmail(principal));
+        return new ApiResponse(clientList, true);
     }
 
     public Client findByIdAndCreatedBy(String empUsername, int id) {

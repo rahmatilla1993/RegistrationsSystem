@@ -1,6 +1,7 @@
 package com.example.accountingsystem.controller;
 
 import com.example.accountingsystem.dto.EmployeeDto;
+import com.example.accountingsystem.entity.Employee;
 import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
 import com.example.accountingsystem.payload.ApiResponse;
@@ -39,8 +40,9 @@ public class EmployeeController {
 
     @GetMapping("/{id}")
     public HttpEntity<?> findById(@PathVariable int id) {
+        Employee employee = employeeService.findById(id);
         return ResponseEntity.ok(
-                employeeService.findById(id)
+                new ApiResponse(employee, true)
         );
     }
 

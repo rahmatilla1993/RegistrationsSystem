@@ -15,6 +15,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -38,8 +39,9 @@ public class EmployeeService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public Page<Employee> getAll(Pageable pageable) {
-        return employeeRepository.findAll(pageable);
+    public ApiResponse getAll(Pageable pageable) {
+        Page<Employee> employees = employeeRepository.findAll(pageable);
+        return new ApiResponse(employees, true);
     }
 
     public Employee findById(int id) {
@@ -65,6 +67,20 @@ public class EmployeeService {
 
     private boolean existsByEmail(String email) {
         return employeeRepository.existsByEmail(email);
+    }
+
+    public void employeeIsAvailableInDepartment(Employee employee, String depName) {
+        Optional<Department> optionalDepartment = departmentService.findByName(depName);
+        if (optionalDepartment.isPresent()) {
+            Department department = optionalDepartment.get();
+            List<Employee> employeeList = employeeRepository.findAllByDepartment(department);
+            if (employeeList.contains(employee)) {
+                return;
+            } else throw new ObjectNotFoundException(
+                    "This employee does not exist in the %s department".formatted(depName)
+            );
+        }
+        throw new ObjectNotFoundException("Department not found");
     }
 
     @Transactional

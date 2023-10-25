@@ -22,8 +22,9 @@ public class DepartmentService {
         this.departmentRepository = departmentRepository;
     }
 
-    public Page<Department> getAll(Pageable pageable) {
-        return departmentRepository.findAll(pageable);
+    public ApiResponse getAll(Pageable pageable) {
+        Page<Department> departments = departmentRepository.findAll(pageable);
+        return new ApiResponse(departments, true);
     }
 
     public Department findById(int id) {
@@ -37,10 +38,11 @@ public class DepartmentService {
     }
 
     public ApiResponse save(Department department) {
-        if (findByName(department.getName())) {
+        if (findByName(department.getName()).isEmpty()) {
             departmentRepository.save(department);
+            return new ApiResponse("Department added", true);
         }
-        return new ApiResponse("Department added", true);
+        throw new ObjectExistsException("This department already exists");
     }
 
     public ApiResponse delete(int id) {
@@ -53,17 +55,15 @@ public class DepartmentService {
 
     public ApiResponse edit(Department department, int id) {
         Department editedDep = findById(id);
-        if (findByName(department.getName())) {
+        if (findByName(department.getName()).isEmpty()) {
             editedDep.setName(department.getName());
             departmentRepository.save(editedDep);
+            return new ApiResponse("Department edited", true);
         }
-        return new ApiResponse("Department edited", true);
+        throw new ObjectExistsException("This department already exists");
     }
 
-    public boolean findByName(String depName) {
-        Optional<Department> optionalDepartment = departmentRepository.findByName(depName);
-        if (optionalDepartment.isPresent()) {
-            throw new ObjectExistsException("This department already exists");
-        } else return true;
+    public Optional<Department> findByName(String depName) {
+        return departmentRepository.findByName(depName);
     }
 }

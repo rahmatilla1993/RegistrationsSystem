@@ -1,10 +1,11 @@
 package com.example.accountingsystem.controller;
 
-import com.example.accountingsystem.entity.Department;
-import com.example.accountingsystem.exception.ObjectExistsException;
+import com.example.accountingsystem.dto.AdvertisementDto;
+import com.example.accountingsystem.entity.Advertisement;
+import com.example.accountingsystem.exception.ObjectNotCreateException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
 import com.example.accountingsystem.payload.ApiResponse;
-import com.example.accountingsystem.service.DepartmentService;
+import com.example.accountingsystem.service.AdvertisementService;
 import com.example.accountingsystem.validations.ResponseErrorValidation;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,72 +17,81 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-@RestController
-@RequestMapping("/api/department")
-public class DepartmentController {
+import java.security.Principal;
 
-    private final DepartmentService departmentService;
+@RestController
+@RequestMapping("/api/advertisement")
+public class AdvertisementController {
+
+    private final AdvertisementService advertisementService;
     private final ResponseErrorValidation errorValidation;
 
     @Autowired
-    public DepartmentController(DepartmentService departmentService,
-                                ResponseErrorValidation errorValidation
-    ) {
-        this.departmentService = departmentService;
+    public AdvertisementController(AdvertisementService advertisementService,
+                                   ResponseErrorValidation errorValidation) {
+        this.advertisementService = advertisementService;
         this.errorValidation = errorValidation;
     }
 
     @GetMapping
     public HttpEntity<?> getAll(Pageable pageable) {
         return ResponseEntity.ok(
-                departmentService.getAll(pageable)
+                advertisementService.getAll(pageable)
+        );
+    }
+
+    @GetMapping("/byPage")
+    public HttpEntity<?> getAllByPage(@RequestParam("page") int page,
+                                      @RequestParam("limit") int limit) {
+        return ResponseEntity.ok(
+                advertisementService.getAllByPage(page, limit)
         );
     }
 
     @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable int id) {
-        Department department = departmentService.findById(id);
+    public HttpEntity<?> findById(@PathVariable("id") int id) {
+        Advertisement advertisement = advertisementService.findById(id);
         return ResponseEntity.ok(
-                new ApiResponse(department, true)
+                new ApiResponse(advertisement, true)
         );
     }
 
     @PostMapping
-    public HttpEntity<?> save(@RequestBody @Valid Department department,
-                              BindingResult bindingResult
-    ) {
+    public HttpEntity<?> save(@RequestBody @Valid AdvertisementDto advertisementDto,
+                              BindingResult bindingResult,
+                              Principal principal) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                departmentService.save(department)
+                advertisementService.save(advertisementDto, principal)
         );
     }
 
     @PutMapping("/{id}")
-    public HttpEntity<?> edit(@RequestBody @Valid Department department,
+    public HttpEntity<?> edit(@PathVariable("id") int id,
+                              @RequestBody @Valid AdvertisementDto advertisementDto,
                               BindingResult bindingResult,
-                              @PathVariable int id
-    ) {
+                              Principal principal) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                departmentService.edit(department, id)
+                advertisementService.edit(advertisementDto, id, principal)
         );
     }
 
     @DeleteMapping("/{id}")
-    public HttpEntity<?> delete(@PathVariable int id) {
+    public HttpEntity<?> delete(@PathVariable("id") int id, Principal principal) {
         return ResponseEntity.ok(
-                departmentService.delete(id)
+                advertisementService.delete(id, principal)
         );
     }
 
     @ExceptionHandler
-    public HttpEntity<?> exceptionHandler(ObjectExistsException ex) {
+    public HttpEntity<?> exceptionHandler(ObjectNotCreateException ex) {
         var apiResponse = new ApiResponse(ex.getMessage(), false);
         return ResponseEntity
                 .badRequest()

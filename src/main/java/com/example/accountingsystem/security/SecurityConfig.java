@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .hasRole("DIRECTOR")
                 .requestMatchers("/api/employee/**")
                 .hasAnyRole("MANAGER", "DIRECTOR")
-                .requestMatchers("/api/client/**")
+                .requestMatchers("/api/client/**", "/api/advertisement/**")
                 .hasRole("EMPLOYEE")
                 .anyRequest()
                 .fullyAuthenticated()

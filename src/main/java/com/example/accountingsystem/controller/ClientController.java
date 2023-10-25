@@ -1,6 +1,7 @@
 package com.example.accountingsystem.controller;
 
 import com.example.accountingsystem.dto.ClientDto;
+import com.example.accountingsystem.entity.Client;
 import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotCreateException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
@@ -41,8 +42,9 @@ public class ClientController {
 
     @GetMapping("/{id}")
     public HttpEntity<?> findById(@PathVariable int id, Principal principal) {
+        Client client = clientService.findByIdAndCreatedBy(principal.getName(), id);
         return ResponseEntity.ok(
-                clientService.findByIdAndCreatedBy(principal.getName(), id)
+                new ApiResponse(client, true)
         );
     }
 

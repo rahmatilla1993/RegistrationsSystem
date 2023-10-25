@@ -2,7 +2,6 @@ package com.example.accountingsystem.service;
 
 import com.example.accountingsystem.dto.PassportDto;
 import com.example.accountingsystem.entity.Passport;
-import com.example.accountingsystem.entity.Employee;
 import com.example.accountingsystem.entity.Person;
 import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
