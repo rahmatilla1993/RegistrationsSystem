@@ -28,7 +28,7 @@ public class SecurityConfig {
                 .csrf()
                 .disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/api/department/**")
+                .requestMatchers("/api/department/**", "/api/statistics/**")
                 .hasRole("DIRECTOR")
                 .requestMatchers("/api/employee/**")
                 .hasAnyRole("MANAGER", "DIRECTOR")
