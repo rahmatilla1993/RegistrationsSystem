@@ -56,4 +56,46 @@ public class StatisticsController {
                 statisticsService.getTotalSalary()
         );
     }
+
+    //clients
+
+    //task-1
+    @GetMapping("/dailyRegister")
+    public HttpEntity<?> getDailyRegisteredCount() {
+        return ResponseEntity.ok(
+                statisticsService.getDailyRegisteredCount()
+        );
+    }
+
+    //task-2
+    @GetMapping("/mostRegisteredClients")
+    public HttpEntity<?> getEmployeeWithMostClientRegistered() {
+        return ResponseEntity.ok(
+                statisticsService.getEmployeeWithMostClientRegistered()
+        );
+    }
+
+    //task-3
+    @GetMapping("/topEmployees")
+    public HttpEntity<?> getTopEmployeesWithMostClientsRegistered(@RequestParam("size") int size) {
+        return ResponseEntity.ok(
+                statisticsService.getTopEmployeesWithMostCustomerRegistrations(size)
+        );
+    }
+
+    //task-4
+    @GetMapping("/registeredLastMonth")
+    public HttpEntity<?> getCountRegistrationClientsInTheLastMonth() {
+        return ResponseEntity.ok(
+                statisticsService.getCountRegistrationClientsInTheLastMonth()
+        );
+    }
+
+    //task-5
+    @GetMapping("/dayOfMostRegistered")
+    public HttpEntity<?> getDayOfTheLastMonthMostClientsRegistered() {
+        return ResponseEntity.ok(
+                statisticsService.getDayOfTheLastMonthMostClientsRegistered()
+        );
+    }
 }

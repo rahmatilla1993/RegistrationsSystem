@@ -5,10 +5,12 @@ import com.example.accountingsystem.projection.IEmployeeCount;
 import com.example.accountingsystem.projection.IEmployeeSalary;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
-public interface StatisticsRepository extends JpaRepository<Employee, Integer> {
+@Repository
+public interface EmployeeStatisticsRepository extends JpaRepository<Employee, Integer> {
 
     @Query(value = "select d.name as departmentName," +
             "count(*) as employeeCount," +

@@ -1,0 +1,54 @@
+create function getemployeeswithmostcustomerregistrations(size integer)
+    returns TABLE
+            (
+                firstname    character varying,
+                lastname     character varying,
+                age          integer,
+                address      character varying,
+                email        character varying,
+                salary       integer,
+                clientscount bigint
+            )
+    language plpgsql
+as
+$$
+begin
+    return query
+        select p.first_name as firstname,
+               p.last_name  as lastname,
+               p.age        as age,
+               p.address    as address,
+               e.email      as email,
+               e.salary     as salary,
+               count(*)     as clientscount
+        from client c
+                 inner join employee e
+                            on c.created_by = e.email
+                 inner join person p
+                            on p.id = e.employee
+                 inner join department d
+                            on e.department_id = d.id
+        where d.name = 'Customer_service'
+        group by e.employee, p.id
+        order by clientscount desc
+        limit size;
+end;
+$$;
+
+create function getdayofthelastmonthmostclientsregistered() returns date
+    language plpgsql
+as
+$$
+declare
+    registered_date date;
+begin
+    select date(created_at), count(*) as registeredCount
+    into registered_date
+    from client
+    where date(created_at) >= current_date - interval '1 month'
+    group by date(created_at)
+    order by registeredCount desc
+    limit 1;
+    return registered_date;
+end;
+$$;
