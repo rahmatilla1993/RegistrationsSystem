@@ -74,7 +74,7 @@ public class EmployeeService {
         if (optionalDepartment.isPresent()) {
             Department department = optionalDepartment.get();
             List<Employee> employeeList = employeeRepository.findAllByDepartment(department);
-            if (employeeList.contains(employee)) {
+            if (employeeList.contains(employee) || employee.getRole().toString().equals("ROLE_DIRECTOR")) {
                 return;
             } else throw new ObjectNotFoundException(
                     "This employee does not exist in the %s department".formatted(depName)

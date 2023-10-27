@@ -13,6 +13,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,9 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/advertisement")
+@PreAuthorize(
+        value = "hasAnyRole('ROLE_MANAGER', 'ROLE_DIRECTOR', 'ROLE_EMPLOYEE')"
+)
 public class AdvertisementController {
 
     private final AdvertisementService advertisementService;
@@ -84,6 +88,7 @@ public class AdvertisementController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize(value = "hasAnyRole('ROLE_MANAGER', 'ROLE_DIRECTOR')")
     public HttpEntity<?> delete(@PathVariable("id") int id, Principal principal) {
         return ResponseEntity.ok(
                 advertisementService.delete(id, principal)

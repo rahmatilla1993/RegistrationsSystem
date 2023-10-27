@@ -58,7 +58,7 @@ public class AdvertisementService {
         return advertisement.getCreatedBy().equals(employee);
     }
 
-    //Only employees in the sales department add advertisement
+    //Only employees and managers in the sales department and director add advertisement
     @Transactional
     public ApiResponse save(AdvertisementDto advertisementDto, Principal principal) {
         Employee employee = employeeService.findByEmail(getEmployeeEmail(principal));
@@ -74,7 +74,7 @@ public class AdvertisementService {
         return new ApiResponse("Saved", true);
     }
 
-    //Only employees in the sales department edit advertisement
+    //Only employee and managers in the sales department and director add advertisement
     @Transactional
     public ApiResponse edit(AdvertisementDto advertisementDto, int id, Principal principal) {
         Employee employee = employeeService.findByEmail(getEmployeeEmail(principal));
@@ -90,7 +90,7 @@ public class AdvertisementService {
                 "Because this employee has not added an advertisement");
     }
 
-    //Only employees in the sales department delete advertisement
+    //Only managers in the sales department and director add advertisement
     @Transactional
     public ApiResponse delete(int id, Principal principal) {
         Employee employee = employeeService.findByEmail(getEmployeeEmail(principal));

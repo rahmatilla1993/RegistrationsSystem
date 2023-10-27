@@ -13,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -21,6 +22,9 @@ import java.security.Principal;
 
 @RestController
 @RequestMapping("/api/client")
+@PreAuthorize(
+        value = "hasAnyRole('ROLE_MANAGER', 'ROLE_DIRECTOR', 'ROLE_EMPLOYEE')"
+)
 public class ClientController {
 
     private final ClientService clientService;
@@ -78,6 +82,7 @@ public class ClientController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize(value = "hasAnyRole('ROLE_MANAGER', 'ROLE_DIRECTOR')")
     public HttpEntity<?> delete(@PathVariable int id, Principal principal) {
         return ResponseEntity.ok(
                 clientService.delete(id, principal)

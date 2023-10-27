@@ -13,12 +13,16 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/api/employee")
+@PreAuthorize(
+        value = "hasAnyRole('ROLE_MANAGER', 'ROLE_DIRECTOR', 'ROLE_EMPLOYEE')"
+)
 public class EmployeeController {
 
     private final EmployeeService employeeService;
@@ -72,6 +76,7 @@ public class EmployeeController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize(value = "hasRole('ROLE_DIRECTOR')")
     public HttpEntity<?> delete(@PathVariable int id) {
         return ResponseEntity.ok(
                 employeeService.delete(id)
