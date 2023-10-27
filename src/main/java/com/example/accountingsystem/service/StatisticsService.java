@@ -2,10 +2,8 @@ package com.example.accountingsystem.service;
 
 import com.example.accountingsystem.entity.Employee;
 import com.example.accountingsystem.payload.ApiResponse;
-import com.example.accountingsystem.projection.IClient;
-import com.example.accountingsystem.projection.IDailyRegister;
-import com.example.accountingsystem.projection.IEmployeeCount;
-import com.example.accountingsystem.projection.IEmployeeSalary;
+import com.example.accountingsystem.projection.*;
+import com.example.accountingsystem.repository.AdvertisementStatisticsRepository;
 import com.example.accountingsystem.repository.ClientStatisticsRepository;
 import com.example.accountingsystem.repository.EmployeeStatisticsRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,13 +18,19 @@ public class StatisticsService {
 
     private final EmployeeStatisticsRepository employeeStatisticsRepository;
     private final ClientStatisticsRepository clientStatisticsRepository;
+    private final AdvertisementStatisticsRepository advertisementStatisticsRepository;
 
     @Autowired
     public StatisticsService(EmployeeStatisticsRepository employeeStatisticsRepository,
-                             ClientStatisticsRepository clientStatisticsRepository) {
+                             ClientStatisticsRepository clientStatisticsRepository,
+                             AdvertisementStatisticsRepository advertisementStatisticsRepository
+    ) {
         this.employeeStatisticsRepository = employeeStatisticsRepository;
         this.clientStatisticsRepository = clientStatisticsRepository;
+        this.advertisementStatisticsRepository = advertisementStatisticsRepository;
     }
+
+    //employees
 
     public ApiResponse getNumberOfEmployeesInDepartment() {
         List<IEmployeeCount> list = employeeStatisticsRepository.numberOfEmployeesInDepartments();
@@ -88,5 +92,36 @@ public class StatisticsService {
     public ApiResponse getDailyRegisteredCount() {
         List<IDailyRegister> registerList = clientStatisticsRepository.getDailyRegisteredCount();
         return new ApiResponse(registerList, true);
+    }
+
+    //advertisements
+    public ApiResponse getPopularTypeOfAdvertisingCosts() {
+        List<IAdvertisement> list = advertisementStatisticsRepository
+                .getPopularTypeOfAdvertisingCosts();
+        return new ApiResponse(list.get(0), true);
+    }
+
+    public ApiResponse getEmployeeByMostAdvertisingCosts() {
+        List<IEmployee> employeeList = advertisementStatisticsRepository
+                .getEmployeeByMostAdvertisingCosts();
+        return new ApiResponse(employeeList, true);
+    }
+
+    public ApiResponse getCountOfAdvertisementAddedInLastMonth() {
+        Integer counts = advertisementStatisticsRepository
+                .getCountOfAdvertisementAddedInLastMonth();
+        return new ApiResponse(counts, true);
+    }
+
+    public ApiResponse getCountOfExpiredAdvertisementsInLastMonth() {
+        Integer count = advertisementStatisticsRepository
+                .getCountOfExpiredAdvertisementsInLastMonth();
+        return new ApiResponse(count, true);
+    }
+
+    public ApiResponse getTypesOfAdvertisingCosts() {
+        List<IAdvertisement> list = advertisementStatisticsRepository
+                .getTypesOfAdvertisingCosts();
+        return new ApiResponse(list, true);
     }
 }

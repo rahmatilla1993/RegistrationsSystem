@@ -98,4 +98,46 @@ public class StatisticsController {
                 statisticsService.getDayOfTheLastMonthMostClientsRegistered()
         );
     }
+
+    //advertisements
+
+    //task-1
+    @GetMapping("/popularType")
+    public HttpEntity<?> getPopularTypeOfAdvertisingCosts() {
+        return ResponseEntity.ok(
+                statisticsService.getPopularTypeOfAdvertisingCosts()
+        );
+    }
+
+    //task-2
+    @GetMapping("/employeeByMostAdvertisingCost")
+    public HttpEntity<?> getEmployeeByMostAdvertisingCosts() {
+        return ResponseEntity.ok(
+                statisticsService.getEmployeeByMostAdvertisingCosts()
+        );
+    }
+
+    //task-3
+    @GetMapping("/countOfAdvertisementAdded")
+    public HttpEntity<?> getCountOfAdvertisementAddedInLastMonth() {
+        return ResponseEntity.ok(
+                statisticsService.getCountOfAdvertisementAddedInLastMonth()
+        );
+    }
+
+    //task-4
+    @GetMapping("/countOfExpiredAdvertisement")
+    public HttpEntity<?> getCountOfExpiredAdvertisementsInLastMonth() {
+        return ResponseEntity.ok(
+                statisticsService.getCountOfExpiredAdvertisementsInLastMonth()
+        );
+    }
+
+    //task-5
+    @GetMapping("/getAdvertisementTypes")
+    public HttpEntity<?> getTypesOfAdvertisingCosts() {
+        return ResponseEntity.ok(
+                statisticsService.getTypesOfAdvertisingCosts()
+        );
+    }
 }
