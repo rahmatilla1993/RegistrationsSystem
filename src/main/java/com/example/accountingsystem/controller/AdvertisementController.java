@@ -38,23 +38,24 @@ public class AdvertisementController {
     }
 
     @GetMapping
-    public HttpEntity<?> getAll(Pageable pageable) {
+    public HttpEntity<?> getAll(Pageable pageable, Principal principal) {
         return ResponseEntity.ok(
-                advertisementService.getAll(pageable)
+                advertisementService.getAll(pageable, principal)
         );
     }
 
     @GetMapping("/byPage")
     public HttpEntity<?> getAllByPage(@RequestParam("page") int page,
-                                      @RequestParam("limit") int limit) {
+                                      @RequestParam("limit") int limit,
+                                      Principal principal) {
         return ResponseEntity.ok(
-                advertisementService.getAllByPage(page, limit)
+                advertisementService.getAllByPage(page, limit, principal)
         );
     }
 
     @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable("id") int id) {
-        Advertisement advertisement = advertisementService.findById(id);
+    public HttpEntity<?> findById(@PathVariable("id") int id, Principal principal) {
+        Advertisement advertisement = advertisementService.findById(id, principal);
         return ResponseEntity.ok(
                 new ApiResponse(advertisement, true)
         );

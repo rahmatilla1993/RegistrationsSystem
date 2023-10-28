@@ -18,6 +18,8 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/employee")
 @PreAuthorize(
@@ -36,15 +38,15 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public HttpEntity<?> getAll(Pageable pageable) {
+    public HttpEntity<?> getAll(Pageable pageable, Principal principal) {
         return ResponseEntity.ok(
-                employeeService.getAll(pageable)
+                employeeService.getAll(pageable, principal)
         );
     }
 
     @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable int id) {
-        Employee employee = employeeService.findById(id);
+    public HttpEntity<?> findById(@PathVariable int id, Principal principal) {
+        Employee employee = employeeService.findById(id, principal);
         return ResponseEntity.ok(
                 new ApiResponse(employee, true)
         );
@@ -52,34 +54,36 @@ public class EmployeeController {
 
     @PostMapping
     public HttpEntity<?> save(@RequestBody @Valid EmployeeDto employeeDto,
-                              BindingResult bindingResult) {
+                              BindingResult bindingResult,
+                              Principal principal) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                employeeService.save(employeeDto)
+                employeeService.save(employeeDto, principal)
         );
     }
 
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable int id,
                               @RequestBody @Valid EmployeeDto employeeDto,
-                              BindingResult bindingResult) {
+                              BindingResult bindingResult,
+                              Principal principal) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                employeeService.edit(employeeDto, id)
+                employeeService.edit(employeeDto, id, principal)
         );
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize(value = "hasRole('ROLE_DIRECTOR')")
-    public HttpEntity<?> delete(@PathVariable int id) {
+    public HttpEntity<?> delete(@PathVariable int id, Principal principal) {
         return ResponseEntity.ok(
-                employeeService.delete(id)
+                employeeService.delete(id, principal)
         );
     }
 

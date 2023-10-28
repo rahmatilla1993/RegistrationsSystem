@@ -8,6 +8,7 @@ import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
 import com.example.accountingsystem.payload.ApiResponse;
 import com.example.accountingsystem.repository.EmployeeRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -15,17 +16,23 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.security.Principal;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class EmployeeService {
 
     private final EmployeeRepository employeeRepository;
     private final DepartmentService departmentService;
     private final PassportService passportService;
     private final PasswordEncoder passwordEncoder;
+
+    private static final String LOG_MESSAGE = "Employee with email {} send a request " +
+            "to the {} endpoint via the {} method and " +
+            "{} the table {}";
 
     @Autowired
     public EmployeeService(EmployeeRepository employeeRepository,
@@ -39,18 +46,24 @@ public class EmployeeService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public ApiResponse getAll(Pageable pageable) {
+    public ApiResponse getAll(Pageable pageable, Principal principal) {
         Page<Employee> employees = employeeRepository.findAll(pageable);
+        log.info(LOG_MESSAGE, getEmployeeEmail(principal), "/api/employee", "GET",
+                "fetched all the data from", "employee");
         return new ApiResponse(employees, true);
     }
 
-    public Employee findById(int id) {
+    public Employee findById(int id, Principal principal) {
         Optional<Employee> optionalPerson = employeeRepository.findById(id);
         if (optionalPerson.isPresent()) {
+            log.info(LOG_MESSAGE, getEmployeeEmail(principal), "/api/employee/%d".formatted(id), "GET",
+                    "get one data from", "employee");
             return optionalPerson.get();
-        } else throw new ObjectNotFoundException(
-                "Employee with %d id not found".formatted(id)
-        );
+        } else {
+            String message = "Employee with %d id not found".formatted(id);
+            log.error("Exception occurred: {}", message);
+            throw new ObjectNotFoundException(message);
+        }
     }
 
     public Employee findByEmail(String email) {
@@ -58,7 +71,9 @@ public class EmployeeService {
         if (optionalEmployee.isPresent()) {
             return optionalEmployee.get();
         }
-        throw new ObjectNotFoundException("Employee not found");
+        String mes = "Employee not found";
+        log.error("Exception occurred: {}", mes);
+        throw new ObjectNotFoundException(mes);
     }
 
     private boolean existsByIdNotAndEmail(String email, int id) {
@@ -76,17 +91,19 @@ public class EmployeeService {
             List<Employee> employeeList = employeeRepository.findAllByDepartment(department);
             if (employeeList.contains(employee) || employee.getRole().toString().equals("ROLE_DIRECTOR")) {
                 return;
-            } else throw new ObjectNotFoundException(
-                    "This employee does not exist in the %s department".formatted(depName)
-            );
+            } else {
+                String message = "This employee does not exist in the %s department".formatted(depName);
+                log.error("Exception occurred: {}", message);
+                throw new ObjectNotFoundException(message);
+            }
         }
         throw new ObjectNotFoundException("Department not found");
     }
 
     @Transactional
-    public ApiResponse save(EmployeeDto employeeDto) {
+    public ApiResponse save(EmployeeDto employeeDto, Principal principal) {
         if (!existsByEmail(employeeDto.getEmail())) {
-            Department department = departmentService.findById(employeeDto.getDepartmentId());
+            Department department = departmentService.findById(employeeDto.getDepartmentId(), principal);
             Employee employee = new Employee(
                     employeeDto.getFirstName(),
                     employeeDto.getLastName(),
@@ -100,16 +117,20 @@ public class EmployeeService {
             );
             Employee savedEmployee = employeeRepository.save(employee);
             passportService.save(employeeDto.getPassport(), savedEmployee);
+            log.info(LOG_MESSAGE, getEmployeeEmail(principal), "/api/employee", "POST",
+                    "added data to", "employee");
             return new ApiResponse("Employee saved", true);
         }
-        throw new ObjectExistsException("This email already taken");
+        String mes = "This email already taken";
+        log.error("Exception occurred: {}", mes);
+        throw new ObjectExistsException(mes);
     }
 
     @Transactional
-    public ApiResponse edit(EmployeeDto employeeDto, int id) {
+    public ApiResponse edit(EmployeeDto employeeDto, int id, Principal principal) {
         if (!existsByIdNotAndEmail(employeeDto.getEmail(), id)) {
-            Employee employee = findById(id);
-            Department department = departmentService.findById(employeeDto.getDepartmentId());
+            Employee employee = findById(id, principal);
+            Department department = departmentService.findById(employeeDto.getDepartmentId(), principal);
             employee.setAddress(employeeDto.getAddress());
             employee.setAge(employeeDto.getAge());
             employee.setFirstName(employeeDto.getFirstName());
@@ -120,15 +141,25 @@ public class EmployeeService {
             employee.setEmail(employeeDto.getEmail());
             employee.setPassword(passwordEncoder.encode(employeeDto.getPassword()));
             passportService.edit(employeeDto.getPassport(), employee);
+            log.info(LOG_MESSAGE, getEmployeeEmail(principal), "/api/employee/%d".formatted(id), "PUT",
+                    "edited data to", "employee");
             return new ApiResponse("Employee edited", true);
         }
-        throw new ObjectExistsException("This email already taken");
+        String mes = "This email already taken";
+        log.error("Exception occurred: {}", mes);
+        throw new ObjectExistsException(mes);
     }
 
     @Transactional
-    public ApiResponse delete(int id) {
-        Employee employee = findById(id);
+    public ApiResponse delete(int id, Principal principal) {
+        Employee employee = findById(id, principal);
         employeeRepository.delete(employee);
+        log.info(LOG_MESSAGE, getEmployeeEmail(principal), "/api/employee/%d".formatted(id), "DELETE",
+                "delete data from", "employee");
         return new ApiResponse("Deleted", true);
+    }
+
+    private String getEmployeeEmail(Principal principal) {
+        return principal.getName();
     }
 }

@@ -6,6 +6,7 @@ import com.example.accountingsystem.entity.Person;
 import com.example.accountingsystem.exception.ObjectExistsException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
 import com.example.accountingsystem.repository.PassportRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -14,9 +15,12 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class PassportService {
 
     private final PassportRepository passportRepository;
+    private static final String LOG_MESSAGE = "Person with id {}" +
+            "{} the table {}";
 
     @Autowired
     public PassportService(PassportRepository passportRepository) {
@@ -63,9 +67,11 @@ public class PassportService {
         Optional<Passport> optionalPassport = passportRepository.findById(id);
         if (optionalPassport.isPresent()) {
             return optionalPassport.get();
-        } else throw new ObjectNotFoundException(
-                "Passport with %d id not found!".formatted(id)
-        );
+        } else {
+            String message = "Passport with %d id not found!".formatted(id);
+            log.error("Error occurred:{}", message);
+            throw new ObjectNotFoundException(message);
+        }
     }
 
     @Transactional
@@ -81,6 +87,7 @@ public class PassportService {
                     person
             );
             passportRepository.save(passport);
+            log.info(LOG_MESSAGE, person.getId(), "added passport data to", "passport");
         }
     }
 
@@ -95,6 +102,7 @@ public class PassportService {
             passport.setNationality(passportDto.getNationality());
             passport.setIdentityNumber(passportDto.getIdentityNumber());
             passportRepository.save(passport);
+            log.info(LOG_MESSAGE, person.getId(), "edited passport data from", "passport");
         }
     }
 
@@ -102,5 +110,6 @@ public class PassportService {
     public void delete(Person person) {
         Passport passport = findByPerson(person);
         passportRepository.delete(passport);
+        log.info(LOG_MESSAGE, person.getId(), "delete passport data from", "passport");
     }
 }

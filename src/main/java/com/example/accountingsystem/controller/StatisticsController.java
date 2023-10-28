@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.security.Principal;
+
 @RestController
 @RequestMapping("/api/statistics")
 @PreAuthorize(
@@ -25,39 +27,41 @@ public class StatisticsController {
     }
 
     @GetMapping
-    public HttpEntity<?> getNumberOfEmployeesInDepartment() {
+    public HttpEntity<?> getNumberOfEmployeesInDepartment(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getNumberOfEmployeesInDepartment()
+                statisticsService.getNumberOfEmployeesInDepartment(principal)
         );
     }
 
     @GetMapping("/byAge")
     public HttpEntity<?> getAllByAge(@RequestParam("age") int age,
-                                     @RequestParam("condition") String condition) {
+                                     @RequestParam("condition") String condition,
+                                     Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getEmployeesByAge(age, condition)
+                statisticsService.getEmployeesByAge(age, condition, principal)
         );
     }
 
     @GetMapping("/byPage")
     public HttpEntity<?> getAllByPage(@RequestParam("page") int page,
-                                      @RequestParam("size") int size) {
+                                      @RequestParam("size") int size,
+                                      Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getEmployeesByPage(page, size)
+                statisticsService.getEmployeesByPage(page, size, principal)
         );
     }
 
     @GetMapping("/summa")
-    public HttpEntity<?> getSumOfSalaryByDepartments() {
+    public HttpEntity<?> getSumOfSalaryByDepartments(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getSumOfSalaryAllEmployeesByDepartments()
+                statisticsService.getSumOfSalaryAllEmployeesByDepartments(principal)
         );
     }
 
     @GetMapping("/totalSum")
-    public HttpEntity<?> getTotalSum() {
+    public HttpEntity<?> getTotalSum(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getTotalSalary()
+                statisticsService.getTotalSalary(principal)
         );
     }
 
@@ -65,41 +69,42 @@ public class StatisticsController {
 
     //task-1
     @GetMapping("/dailyRegister")
-    public HttpEntity<?> getDailyRegisteredCount() {
+    public HttpEntity<?> getDailyRegisteredCount(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getDailyRegisteredCount()
+                statisticsService.getDailyRegisteredCount(principal)
         );
     }
 
     //task-2
     @GetMapping("/mostRegisteredClients")
-    public HttpEntity<?> getEmployeeWithMostClientRegistered() {
+    public HttpEntity<?> getEmployeeWithMostClientRegistered(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getEmployeeWithMostClientRegistered()
+                statisticsService.getEmployeeWithMostClientRegistered(principal)
         );
     }
 
     //task-3
     @GetMapping("/topEmployees")
-    public HttpEntity<?> getTopEmployeesWithMostClientsRegistered(@RequestParam("size") int size) {
+    public HttpEntity<?> getTopEmployeesWithMostClientsRegistered(@RequestParam("size") int size,
+                                                                  Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getTopEmployeesWithMostCustomerRegistrations(size)
+                statisticsService.getTopEmployeesWithMostCustomerRegistrations(size, principal)
         );
     }
 
     //task-4
     @GetMapping("/registeredLastMonth")
-    public HttpEntity<?> getCountRegistrationClientsInTheLastMonth() {
+    public HttpEntity<?> getCountRegistrationClientsInTheLastMonth(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getCountRegistrationClientsInTheLastMonth()
+                statisticsService.getCountRegistrationClientsInTheLastMonth(principal)
         );
     }
 
     //task-5
     @GetMapping("/dayOfMostRegistered")
-    public HttpEntity<?> getDayOfTheLastMonthMostClientsRegistered() {
+    public HttpEntity<?> getDayOfTheLastMonthMostClientsRegistered(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getDayOfTheLastMonthMostClientsRegistered()
+                statisticsService.getDayOfTheLastMonthMostClientsRegistered(principal)
         );
     }
 
@@ -107,41 +112,41 @@ public class StatisticsController {
 
     //task-1
     @GetMapping("/popularType")
-    public HttpEntity<?> getPopularTypeOfAdvertisingCosts() {
+    public HttpEntity<?> getPopularTypeOfAdvertisingCosts(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getPopularTypeOfAdvertisingCosts()
+                statisticsService.getPopularTypeOfAdvertisingCosts(principal)
         );
     }
 
     //task-2
     @GetMapping("/employeeByMostAdvertisingCost")
-    public HttpEntity<?> getEmployeeByMostAdvertisingCosts() {
+    public HttpEntity<?> getEmployeeByMostAdvertisingCosts(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getEmployeeByMostAdvertisingCosts()
+                statisticsService.getEmployeeByMostAdvertisingCosts(principal)
         );
     }
 
     //task-3
     @GetMapping("/countOfAdvertisementAdded")
-    public HttpEntity<?> getCountOfAdvertisementAddedInLastMonth() {
+    public HttpEntity<?> getCountOfAdvertisementAddedInLastMonth(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getCountOfAdvertisementAddedInLastMonth()
+                statisticsService.getCountOfAdvertisementAddedInLastMonth(principal)
         );
     }
 
     //task-4
     @GetMapping("/countOfExpiredAdvertisement")
-    public HttpEntity<?> getCountOfExpiredAdvertisementsInLastMonth() {
+    public HttpEntity<?> getCountOfExpiredAdvertisementsInLastMonth(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getCountOfExpiredAdvertisementsInLastMonth()
+                statisticsService.getCountOfExpiredAdvertisementsInLastMonth(principal)
         );
     }
 
     //task-5
     @GetMapping("/getAdvertisementTypes")
-    public HttpEntity<?> getTypesOfAdvertisingCosts() {
+    public HttpEntity<?> getTypesOfAdvertisingCosts(Principal principal) {
         return ResponseEntity.ok(
-                statisticsService.getTypesOfAdvertisingCosts()
+                statisticsService.getTypesOfAdvertisingCosts(principal)
         );
     }
 }

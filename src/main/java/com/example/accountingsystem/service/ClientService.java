@@ -8,6 +8,7 @@ import com.example.accountingsystem.exception.ObjectNotCreateException;
 import com.example.accountingsystem.exception.ObjectNotFoundException;
 import com.example.accountingsystem.payload.ApiResponse;
 import com.example.accountingsystem.repository.ClientRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,11 +22,16 @@ import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
+@Slf4j
 public class ClientService {
 
     private final ClientRepository clientRepository;
     private final PassportService passportService;
     private final EmployeeService employeeService;
+
+    private static final String LOG_MESSAGE = "Employee with email {} send a request " +
+            "to the {} endpoint via the {} method and " +
+            "{} the table {}";
 
     @Autowired
     public ClientService(ClientRepository clientRepository,
@@ -47,6 +53,8 @@ public class ClientService {
 
     public ApiResponse findAllByCreatedBy(Principal principal) {
         List<Client> clientList = clientRepository.findAllByCreatedBy(getEmpEmail(principal));
+        log.info(LOG_MESSAGE, getEmpEmail(principal), "/api/client", "GET",
+                "fetched all clients data from", "client");
         return new ApiResponse(clientList, true);
     }
 
@@ -54,11 +62,18 @@ public class ClientService {
         if (findById(id)) {
             Optional<Client> optionalClient = clientRepository.findByIdAndCreatedBy(id, empUsername);
             if (optionalClient.isPresent()) {
+                log.info(LOG_MESSAGE, empUsername, "/api/client/%d".formatted(id), "GET",
+                        "fetched one client data from", "client");
                 return optionalClient.get();
+            } else {
+                String message = "This employee has not added this client to the system";
+                log.error(message);
+                throw new ObjectNotCreateException(message);
             }
-            throw new ObjectNotCreateException("This employee has not added this client to the system");
         } else {
-            throw new ObjectNotFoundException("Client not found");
+            String message = "Client not found";
+            log.error("Exception occurred: {}", message);
+            throw new ObjectNotFoundException(message);
         }
     }
 
@@ -75,6 +90,8 @@ public class ClientService {
         );
         Client savedClient = clientRepository.save(client);
         passportService.save(clientDto.getPassport(), savedClient);
+        log.info(LOG_MESSAGE, getEmpEmail(principal), "/api/client", "POST",
+                "added client object", "client");
         return new ApiResponse("Client saved", true);
     }
 
@@ -87,6 +104,8 @@ public class ClientService {
         client.setFirstName(clientDto.getFirstName());
         client.setLastName(clientDto.getLastName());
         client.setAddress(clientDto.getAddress());
+        log.info(LOG_MESSAGE, getEmpEmail(principal), "/api/client/%d".formatted(clientId), "PUT",
+                "edited client data from", "client");
         return new ApiResponse("Client edited", true);
     }
 
@@ -94,6 +113,8 @@ public class ClientService {
     public ApiResponse delete(int clientId, Principal principal) {
         Client client = findByIdAndCreatedBy(getEmpEmail(principal), clientId);
         clientRepository.delete(client);
+        log.info(LOG_MESSAGE, getEmpEmail(principal), "/api/client/%d".formatted(clientId), "DELETE",
+                "deleted client data from", "client");
         return new ApiResponse("Client deleted", true);
     }
 

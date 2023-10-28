@@ -3,6 +3,7 @@ package com.example.accountingsystem.service;
 import com.example.accountingsystem.entity.Employee;
 import com.example.accountingsystem.repository.EmployeeRepository;
 import com.example.accountingsystem.security.SecurityUser;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
+@Slf4j
 public class CustomUserDetailsService implements UserDetailsService {
 
     private final EmployeeRepository employeeRepository;
@@ -25,8 +27,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         Optional<Employee> optionalEmployee = employeeRepository.findByEmail(email);
         if (optionalEmployee.isPresent()) {
-            return new SecurityUser(optionalEmployee.get());
+            Employee user = optionalEmployee.get();
+            log.info("User with {} email:{}", email, user);
+            return new SecurityUser(user);
         }
-        throw new UsernameNotFoundException("Employee with %s email not found".formatted(email));
+        String message = "Employee with %s email not found".formatted(email);
+        log.error("Error occurred:{}", message);
+        throw new UsernameNotFoundException(message);
     }
 }
