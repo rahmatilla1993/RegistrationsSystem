@@ -38,9 +38,9 @@ public class ClientController {
     }
 
     @GetMapping
-    public HttpEntity<?> getAll(Principal principal) {
+    public HttpEntity<?> getAll() {
         return ResponseEntity.ok(
-                clientService.findAllByCreatedBy(principal)
+                clientService.findAllByCreatedBy()
         );
     }
 
@@ -54,38 +54,36 @@ public class ClientController {
 
     @PostMapping
     public HttpEntity<?> save(@RequestBody @Valid ClientDto clientDto,
-                              BindingResult bindingResult,
-                              Principal principal
+                              BindingResult bindingResult
     ) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                clientService.save(clientDto, principal)
+                clientService.save(clientDto)
         );
     }
 
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable int id,
                               @RequestBody @Valid ClientDto clientDto,
-                              BindingResult bindingResult,
-                              Principal principal
+                              BindingResult bindingResult
     ) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                clientService.edit(clientDto, id, principal)
+                clientService.edit(clientDto, id)
         );
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize(value = "hasAnyRole('ROLE_MANAGER', 'ROLE_DIRECTOR')")
-    public HttpEntity<?> delete(@PathVariable int id, Principal principal) {
+    public HttpEntity<?> delete(@PathVariable int id) {
         return ResponseEntity.ok(
-                clientService.delete(id, principal)
+                clientService.delete(id)
         );
     }
 

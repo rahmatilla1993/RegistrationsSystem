@@ -38,24 +38,23 @@ public class AdvertisementController {
     }
 
     @GetMapping
-    public HttpEntity<?> getAll(Pageable pageable, Principal principal) {
+    public HttpEntity<?> getAll(Pageable pageable) {
         return ResponseEntity.ok(
-                advertisementService.getAll(pageable, principal)
+                advertisementService.getAll(pageable)
         );
     }
 
     @GetMapping("/byPage")
     public HttpEntity<?> getAllByPage(@RequestParam("page") int page,
-                                      @RequestParam("limit") int limit,
-                                      Principal principal) {
+                                      @RequestParam("limit") int limit) {
         return ResponseEntity.ok(
-                advertisementService.getAllByPage(page, limit, principal)
+                advertisementService.getAllByPage(page, limit)
         );
     }
 
     @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable("id") int id, Principal principal) {
-        Advertisement advertisement = advertisementService.findById(id, principal);
+    public HttpEntity<?> findById(@PathVariable("id") int id) {
+        Advertisement advertisement = advertisementService.findById(id);
         return ResponseEntity.ok(
                 new ApiResponse(advertisement, true)
         );
@@ -63,36 +62,34 @@ public class AdvertisementController {
 
     @PostMapping
     public HttpEntity<?> save(@RequestBody @Valid AdvertisementDto advertisementDto,
-                              BindingResult bindingResult,
-                              Principal principal) {
+                              BindingResult bindingResult) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                advertisementService.save(advertisementDto, principal)
+                advertisementService.save(advertisementDto)
         );
     }
 
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable("id") int id,
                               @RequestBody @Valid AdvertisementDto advertisementDto,
-                              BindingResult bindingResult,
-                              Principal principal) {
+                              BindingResult bindingResult) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                advertisementService.edit(advertisementDto, id, principal)
+                advertisementService.edit(advertisementDto, id)
         );
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize(value = "hasAnyRole('ROLE_MANAGER', 'ROLE_DIRECTOR')")
-    public HttpEntity<?> delete(@PathVariable("id") int id, Principal principal) {
+    public HttpEntity<?> delete(@PathVariable("id") int id) {
         return ResponseEntity.ok(
-                advertisementService.delete(id, principal)
+                advertisementService.delete(id)
         );
     }
 

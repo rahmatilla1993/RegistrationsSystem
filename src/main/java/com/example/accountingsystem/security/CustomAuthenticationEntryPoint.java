@@ -1,6 +1,6 @@
 package com.example.accountingsystem.security;
 
-import com.example.accountingsystem.payload.UnAuthorizedAccessResponse;
+import com.example.accountingsystem.payload.response.UnAuthorizedAccessResponse;
 import com.google.gson.Gson;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

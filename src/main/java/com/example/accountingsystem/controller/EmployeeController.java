@@ -38,15 +38,15 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public HttpEntity<?> getAll(Pageable pageable, Principal principal) {
+    public HttpEntity<?> getAll(Pageable pageable) {
         return ResponseEntity.ok(
-                employeeService.getAll(pageable, principal)
+                employeeService.getAll(pageable)
         );
     }
 
     @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable int id, Principal principal) {
-        Employee employee = employeeService.findById(id, principal);
+    public HttpEntity<?> findById(@PathVariable int id) {
+        Employee employee = employeeService.findById(id);
         return ResponseEntity.ok(
                 new ApiResponse(employee, true)
         );
@@ -54,28 +54,26 @@ public class EmployeeController {
 
     @PostMapping
     public HttpEntity<?> save(@RequestBody @Valid EmployeeDto employeeDto,
-                              BindingResult bindingResult,
-                              Principal principal) {
+                              BindingResult bindingResult) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                employeeService.save(employeeDto, principal)
+                employeeService.save(employeeDto)
         );
     }
 
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@PathVariable int id,
                               @RequestBody @Valid EmployeeDto employeeDto,
-                              BindingResult bindingResult,
-                              Principal principal) {
+                              BindingResult bindingResult) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                employeeService.edit(employeeDto, id, principal)
+                employeeService.edit(employeeDto, id)
         );
     }
 
@@ -83,7 +81,7 @@ public class EmployeeController {
     @PreAuthorize(value = "hasRole('ROLE_DIRECTOR')")
     public HttpEntity<?> delete(@PathVariable int id, Principal principal) {
         return ResponseEntity.ok(
-                employeeService.delete(id, principal)
+                employeeService.delete(id)
         );
     }
 

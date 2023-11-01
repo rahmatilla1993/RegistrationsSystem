@@ -1,4 +1,4 @@
-package com.example.accountingsystem.payload;
+package com.example.accountingsystem.payload.response;
 
 import lombok.Data;
 

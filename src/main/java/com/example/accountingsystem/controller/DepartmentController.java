@@ -34,15 +34,15 @@ public class DepartmentController {
     }
 
     @GetMapping
-    public HttpEntity<?> getAll(Pageable pageable, Principal principal) {
+    public HttpEntity<?> getAll(Pageable pageable) {
         return ResponseEntity.ok(
-                departmentService.getAll(pageable, principal)
+                departmentService.getAll(pageable)
         );
     }
 
     @GetMapping("/{id}")
-    public HttpEntity<?> findById(@PathVariable int id, Principal principal) {
-        Department department = departmentService.findById(id, principal);
+    public HttpEntity<?> findById(@PathVariable int id) {
+        Department department = departmentService.findById(id);
         return ResponseEntity.ok(
                 new ApiResponse(department, true)
         );
@@ -50,35 +50,35 @@ public class DepartmentController {
 
     @PostMapping
     public HttpEntity<?> save(@RequestBody @Valid Department department,
-                              BindingResult bindingResult, Principal principal
+                              BindingResult bindingResult
     ) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                departmentService.save(department, principal)
+                departmentService.save(department)
         );
     }
 
     @PutMapping("/{id}")
     public HttpEntity<?> edit(@RequestBody @Valid Department department,
                               BindingResult bindingResult,
-                              @PathVariable int id, Principal principal
+                              @PathVariable int id
     ) {
         var errors = errorValidation.mapValidationResult(bindingResult);
         if (!ObjectUtils.isEmpty(errors)) {
             return errors;
         }
         return ResponseEntity.ok(
-                departmentService.edit(department, id, principal)
+                departmentService.edit(department, id)
         );
     }
 
     @DeleteMapping("/{id}")
-    public HttpEntity<?> delete(@PathVariable int id, Principal principal) {
+    public HttpEntity<?> delete(@PathVariable int id) {
         return ResponseEntity.ok(
-                departmentService.delete(id, principal)
+                departmentService.delete(id)
         );
     }
 
